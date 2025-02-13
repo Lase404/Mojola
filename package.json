@@ -8,11 +8,11 @@
   },
   "dependencies": {
     "@fileverse/agents": "^1.0.0",
-    "@safe-global/protocol-kit": "latest", // Update to latest version post-migration
+    "@safe-global/protocol-kit": "latest",
     "@safe-global/types-kit": "^1.0.0",
-    "@uniswap/sdk-core": "^3.2.6", // Check for breaking changes
+    "@uniswap/sdk-core": "^3.2.6",
     "@uniswap/v3-sdk": "latest",
-    "axios": "^0.21.1", // Replaces request
+    "axios": "^0.21.1",
     "coingecko-api": "^1.0.10",
     "dotenv": "^10.0.0",
     "ethers": "^5.6.4",
@@ -20,11 +20,11 @@
     "helmet": "^4.6.0",
     "jsbi": "^3.1.4",
     "newsapi": "^2.4.1",
-    "node-telegram-bot-api": "latest", // Check for updates or alternatives
+    "node-telegram-bot-api": "latest",
     "textblob": "^0.2.2",
     "twitter-v2": "^1.0.0",
     "viem": "^0.1.0",
-    "express-rate-limit": "^5.0.0" // Replaces rate-limit
+    "express-rate-limit": "^5.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
