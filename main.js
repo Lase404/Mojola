@@ -283,10 +283,10 @@ async function executeSwap(sentimentScore, asset, chatId) {
     const chainId = await publicClient.getChainId();
 
     // Example Values for WETH/USDC Uniswap Pool on Ethereum Mainnet:
-    const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-    const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
-    const USDC_ETH_POOL_ADDRESS = "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640";
-    const SWAP_ROUTER_ADDRESS = "0xE592427A0AEce92De3Edee1F18E0157C05861564"; // Uniswap V3 Router
+    const WETH_ADDRESS = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14";
+    const USDC_ADDRESS = "0xBe72e441BF55620FEBcC26715DB68d3494213D8C";
+    const USDC_ETH_POOL_ADDRESS = "0x9799b5edc1aa7d3fad350309b08df3f64914e244";
+    const SWAP_ROUTER_ADDRESS = "0xc532a74256d3db42d0bf7a0400fefdbad7694008"; // Uniswap V3 Router
     const INPUT_AMOUNT = sentimentScore > 0 ? ethers.utils.parseEther("0.1").toString() : "0"; // Amount of ETH to swap to USDC based on sentiment
     const OUTPUT_AMOUNT = sentimentScore > 0 ? "0" : ethers.utils.parseEther("0.1").toString(); // Amount of USDC if selling
 
