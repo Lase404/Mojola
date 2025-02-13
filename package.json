@@ -1,0 +1,51 @@
+{
+  "name": "mojola-ai-agent",
+  "version": "1.0.0",
+  "description": "A  Telegram bot for crypto trading based on sentiment analysis",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@fileverse/agents": "^1.0.0",
+    "@safe-global/protocol-kit": "^1.0.0",
+    "@safe-global/safe-ethers-lib": "^1.0.0",
+    "@uniswap/sdk-core": "^3.0.1",
+    "@uniswap/v3-sdk": "^3.7.2",
+    "coingecko-api": "^1.0.10",
+    "crypto": "^1.0.1",
+    "dotenv": "^10.0.0",
+    "ethers": "^5.6.4",
+    "express": "^4.17.1",
+    "helmet": "^4.6.0",
+    "jsbi": "^3.1.4",
+    "newsapi": "^2.4.1",
+    "node-telegram-bot-api": "^0.57.0",
+    "rate-limit": "^5.0.1",
+    "textblob": "^0.2.2",
+    "twitter-v2": "^1.0.0",
+    "viem": "^0.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "engines": {
+    "node": ">=14.17.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "crypto",
+    "trading",
+    "bot",
+    "telegram",
+    "sentiment"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "render": {
+    "startCommand": "node index.js"
+  }
+}
