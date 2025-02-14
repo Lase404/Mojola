@@ -24,7 +24,8 @@
   "rate-limit": "^0.1.1",
   "sentiment": "^5.0.2",
   "twitter-v2": "^1.0.0",
-  "viem": "^0.1.0"
+  "viem": "^0.1.0",
+    "express-rate-limit": "^7.5.0"
 },
   "devDependencies": {
     "nodemon": "^2.0.15"
