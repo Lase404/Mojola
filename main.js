@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const { Telegraf, Markup, Scenes, session } = require('telegraf');
 const axios = require('axios');
@@ -325,10 +324,23 @@ app.post('/webhook/telegram', (req, res) => {
   res.sendStatus(200);
 });
 const PORT = 4000
-// Start the Express server
-app.listen(PORT, () => {
-  console.log(`Bot is running with webhook on port ${PORT}`);
+
+// =================== Start Express Server ===================
+const bodyParser = require('body-parser');
+const WEBHOOK_PATH = '/webhook/telegram';
+app.use(WEBHOOK_PATH, bodyParser.json());
+
+app.post(WEBHOOK_PATH, bodyParser.json(), (req, res) => {
+  if (!req.body) {
+    logger.error('No body found in Telegram webhook request.');
+    return res.status(400).send('No body found.');
+  }
+
+  logger.info(`Received Telegram update: ${JSON.stringify(req.body, null, 2)}`); // Debugging
+
+  bot.handleUpdate(req.body, res);
 });
+
 // Graceful shutdown
 const gracefulShutdown = () => {
   bot.stop('SIGINT');
