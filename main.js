@@ -2,7 +2,7 @@ require('dotenv').config();
 const { Agent } = require('@fileverse/agents');
 const TelegramBot = require('node-telegram-bot-api');
 const Twitter = require('twitter-v2');
-const TextBlob = require('textblob');
+const Sentiment = require('sentiment'); // New import for sentiment analysis
 const { ethers } = require('ethers');
 const Safe = require('@safe-global/protocol-kit');
 const { EthersAdapter } = require('@safe-global/safe-ethers-lib');
@@ -212,10 +212,11 @@ async function fetchPoolData(publicClient, poolAddress) {
 }
 
 // Function to analyze sentiment
+const sentimentAnalyzer = new Sentiment();
 function analyzeSentiment(text) {
   try {
-    const analysis = new TextBlob(text);
-    return analysis.sentiment.polarity;
+    const result = sentimentAnalyzer.analyze(text);
+    return result.score;
   } catch (error) {
     console.error('Error analyzing sentiment:', error);
     throw error;
@@ -328,7 +329,7 @@ async function executeSwap(sentimentScore, asset, chatId) {
       poolInfo.tick
     );
 
-    const swapRoute = new Route([pool], sentimentScore > 0 ? WETH : USDC, sentimentScore > 0 ?       USDC : WETH);
+    const swapRoute = new Route([pool], sentimentScore > 0 ? WETH : USDC, sentimentScore > 0 ? USDC : WETH);
     
     const uncheckedTrade = Trade.createUncheckedTrade({
       route: swapRoute,
@@ -439,7 +440,7 @@ async function managePortfolio(userId, sentimentData) {
       if (sentimentData[asset] > 0.2) {
         portfolio[asset] += 10;
       } else if (sentimentData[asset] < -0.2) {
-        portfolio[asset] = Math.max(0, portfolio[asset] -        10);
+        portfolio[asset] = Math.max(0, portfolio[asset] - 10);
       }
       // Normalize portfolio to 100%
       const total = Object.values(portfolio).reduce((a, b) => a + b, 0);
