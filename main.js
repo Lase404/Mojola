@@ -336,13 +336,13 @@ app.post(WEBHOOK_PATH, bodyParser.json(), (req, res) => {
     return res.status(400).send('No body found.');
   }
 
-  logger.info(`Received Telegram update: ${JSON.stringify(req.body, null, 2)}`); // Debugging
+  console.log(`Received Telegram update: ${JSON.stringify(req.body, null, 2)}`); // Debugging
 
   bot.handleUpdate(req.body, res);
 });
 
 app.listen(PORT, () => {
-  logger.info(`Webhook server running on port ${SERVER_PORT}`);
+  console.log(`Webhook server running on port ${PORT}`);
 });
 
 // Graceful shutdown
