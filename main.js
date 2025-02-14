@@ -330,18 +330,27 @@ const bodyParser = require('body-parser');
 const WEBHOOK_PATH = '/webhook/telegram';
 app.use(WEBHOOK_PATH, bodyParser.json());
 
-// Manually fetch bot info and set the webhook
-(async () => {
+async function setBotInfoWithRetry(attempt = 1) {
   try {
     const botInfo = await bot.telegram.getMe();
-    bot.botInfo = botInfo;  // Set botInfo manually
+    bot.botInfo = botInfo;
     console.log(`Bot started as @${botInfo.username}`);
 
     await bot.telegram.setWebhook(`${WEBHOOK_URL}/webhook/telegram`);
+    console.log('Webhook successfully set.');
   } catch (error) {
-    console.error('Error fetching bot info:', error);
+    if (error.response && error.response.error_code === 429) {
+      const waitTime = error.response.parameters.retry_after || 1; // Default to 1 second if not specified
+      console.warn(`Rate limit hit. Retrying after ${waitTime} seconds... (Attempt ${attempt})`);
+      setTimeout(() => setBotInfoWithRetry(attempt + 1), waitTime * 1000);
+    } else {
+      console.error('Error fetching bot info:', error);
+    }
   }
-})();
+}
+
+// Initialize bot info and webhook
+setBotInfoWithRetry();
 
 // Handle the webhook update
 app.post(WEBHOOK_PATH, bodyParser.json(), (req, res) => {
@@ -352,7 +361,7 @@ app.post(WEBHOOK_PATH, bodyParser.json(), (req, res) => {
 
   console.log(`Received Telegram update: ${JSON.stringify(req.body, null, 2)}`); // Debugging
 
-  bot.handleUpdate(req.body, res);  // Handle the incoming update
+  bot.handleUpdate(req.body, res);
 });
 
 // Start Express Server
