@@ -21,7 +21,7 @@
     "jsbi": "^3.1.4",
     "newsapi": "^2.4.1",
     "node-telegram-bot-api": "^0.57.0",
-    "rate-limit": "^4.0.0",
+    "rate-limit": "^3.0.0",  // Changed to ^3.0.0 or the highest available version
     "textblob": "^0.2.2",
     "twitter-v2": "^1.0.0",
     "viem": "^0.1.0"
