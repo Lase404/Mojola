@@ -330,19 +330,34 @@ const bodyParser = require('body-parser');
 const WEBHOOK_PATH = '/webhook/telegram';
 app.use(WEBHOOK_PATH, bodyParser.json());
 
+// Manually fetch bot info and set the webhook
+(async () => {
+  try {
+    const botInfo = await bot.telegram.getMe();
+    bot.botInfo = botInfo;  // Set botInfo manually
+    console.log(`Bot started as @${botInfo.username}`);
+
+    await bot.telegram.setWebhook(`${WEBHOOK_URL}/webhook/telegram`);
+  } catch (error) {
+    console.error('Error fetching bot info:', error);
+  }
+})();
+
+// Handle the webhook update
 app.post(WEBHOOK_PATH, bodyParser.json(), (req, res) => {
   if (!req.body) {
-    logger.error('No body found in Telegram webhook request.');
+    console.error('No body found in Telegram webhook request.');
     return res.status(400).send('No body found.');
   }
 
   console.log(`Received Telegram update: ${JSON.stringify(req.body, null, 2)}`); // Debugging
 
-  bot.handleUpdate(req.body, res);
+  bot.handleUpdate(req.body, res);  // Handle the incoming update
 });
 
-app.listen(PORT, () => {
-  console.log(`Webhook server running on port ${PORT}`);
+// Start Express Server
+app.listen(PORT, () => { 
+  console.log(`Webhook server running on port ${PORT}`); 
 });
 
 // Graceful shutdown
