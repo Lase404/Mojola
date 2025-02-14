@@ -229,7 +229,7 @@ async function fetchAndAnalyzeTweets(query, max_results = 100) {
     const tweets = await twitterClient.get('tweets/search/recent', {
       query: query,
       max_results: max_results,
-      tweet.fields: 'created_at,public_metrics'
+      "tweet.fields": 'created_at,public_metrics' // Use quotes around the property name
     });
     const sentiments = tweets.data.map(tweet => analyzeSentiment(tweet.text));
     const avgSentiment = sentiments.reduce((sum, score) => sum + score, 0) / sentiments.length;
@@ -413,7 +413,7 @@ function calculateTotalPNL(chatId) {
 // Function to convert sentiment score to percentage
 function convertSentimentScoreToPercentage(sentimentScore) {
   try {
-    return ((sentimentScore + 1) / 2) * 100;
+    return ((sentimentScore + 5) / 10) * 100; // Sentiment score from -5 to 5, convert to 0-100%
   } catch (error) {
     console.error('Error converting sentiment score to percentage:', error);
     throw error;
@@ -526,12 +526,12 @@ async function executeTrade(sentimentScore, asset, currentPrice, buyPrice, chatI
     }
 
     // If neither profit nor stop-loss conditions are met, proceed with sentiment-based decision
-    if (sentimentScore <= (user?.thresholds?.sell || -0.3) || sentimentScore <= -0.3) {
+    if (sentimentScore <= (user?.thresholds?.sell || -1.5) || sentimentScore <= -1.5) { // Adjust thresholds for sentiment library
       const txHash = await executeSwap(sentimentScore, asset, chatId);
       const pnlPercentage = ((currentPrice - buyPrice) / buyPrice) * 100;
       recordTrade(chatId, asset, 'CLOSED', Date.now(), '15m', buyPrice, currentPrice, pnlPercentage);
       bot.sendMessage(chatId, `Sold ${asset} due to negative sentiment. PNL: ${pnlPercentage > 0 ? '+' : ''}${pnlPercentage.toFixed(2)}%. Transaction Hash: ${txHash}`);
-    } else if (sentimentScore >= (user?.thresholds?.buy || 0.3) || sentimentScore >= 0.3) {
+    } else if (sentimentScore >= (user?.thresholds?.buy || 1.5) || sentimentScore >= 1.5) { // Adjust thresholds for sentiment library
       const txHash = await executeSwap(sentimentScore, asset, chatId);
       recordTrade(chatId, asset, 'OPEN', Date.now(), '15m', currentPrice, 0, 0);
       bot.sendMessage(chatId, `Bought ${asset} due to positive sentiment. Transaction Hash: ${txHash}`);
@@ -773,7 +773,7 @@ const chatId = query.message.chat.id;
 try {
   switch (query.data) {
     case 'set_thresholds':
-      bot.sendMessage(chatId, 'Please provide buy and sell thresholds as /set_threshold buy_threshold sell_threshold. Example: /set_threshold 0.3 -0.3');
+      bot.sendMessage(chatId, 'Please provide buy and sell thresholds as /set_threshold buy_threshold sell_threshold. Example: /set_threshold 1.5 -1.5');
       break;
     case 'set_profit_threshold':
       bot.sendMessage(chatId, 'Please provide your profit threshold as /set_profit_threshold percentage. Example: /set_profit_threshold 20');
