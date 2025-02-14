@@ -314,16 +314,19 @@ bot.hears('Translate Video 📹', (ctx) => {
   ctx.scene.enter('translation_wizard');
 });
 
-// Start the bot in polling mode or webhook mode
-if (process.env.NODE_ENV === 'production') {
-  bot.telegram.setWebhook(process.env.WEBHOOK_URL);
-  app.use(bot.webhookCallback('/webhook/telegram'));
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Bot listening on port ${PORT}`));
-} else {
-  bot.launch();
-}
+// Set webhook
+bot.telegram.setWebhook(`${WEBHOOK_URL}/webhook/telegram`);
 
+// Handle incoming updates from Telegram
+app.post('/webhook', (req, res) => {
+  bot.handleUpdate(req.body);
+  res.sendStatus(200);
+});
+
+// Start the Express server
+app.listen(PORT, () => {
+  console.log(`Bot is running with webhook on port ${PORT}`);
+});
 // Graceful shutdown
 const gracefulShutdown = () => {
   bot.stop('SIGINT');
