@@ -319,7 +319,7 @@ const WEBHOOK_URL = process.env.WEBHOOK_URL
 bot.telegram.setWebhook(`${WEBHOOK_URL}/webhook/telegram`);
 
 // Handle incoming updates from Telegram
-app.post('/webhook', (req, res) => {
+app.post('/webhook/telegram', (req, res) => {
   bot.handleUpdate(req.body);
   res.sendStatus(200);
 });
@@ -327,7 +327,8 @@ const PORT = 4000
 // Start the Express server
 app.listen(PORT, () => {
   console.log(`Bot is running with webhook on port ${PORT}`);
-});
+
+
 // Graceful shutdown
 const gracefulShutdown = () => {
   bot.stop('SIGINT');
