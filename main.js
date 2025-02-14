@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const { Telegraf, Markup, Scenes, session } = require('telegraf');
 const axios = require('axios');
@@ -327,8 +328,7 @@ const PORT = 4000
 // Start the Express server
 app.listen(PORT, () => {
   console.log(`Bot is running with webhook on port ${PORT}`);
-
-
+});
 // Graceful shutdown
 const gracefulShutdown = () => {
   bot.stop('SIGINT');
