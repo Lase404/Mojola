@@ -12,7 +12,7 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.1",
     "helmet": "^4.6.0",
-    "rate-limit": "^5.0.1",
+    "rate-limit": "^0.0.1",
     "telegraf": "^4.7.0"
   },
   "devDependencies": {
