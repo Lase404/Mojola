@@ -340,6 +340,11 @@ app.post(WEBHOOK_PATH, bodyParser.json(), (req, res) => {
 
   bot.handleUpdate(req.body, res);
 });
+const PORT = PORT; // Use the PORT from environment variables
+
+app.listen(PORT, () => {
+  logger.info(`Webhook server running on port ${SERVER_PORT}`);
+});
 
 // Graceful shutdown
 const gracefulShutdown = () => {
