@@ -101,7 +101,7 @@ async function initializeStorage() {
 // Store agent key securely
 async function storeAgentKey(chatId, encryptedKey, agentAddress) {
   try {
-    const data = JSON.stringify({
+        const data = JSON.stringify({
       chatId: chatId,
       encryptedKey: encryptedKey,
       agentAddress: agentAddress
@@ -283,7 +283,7 @@ async function executeSwap(sentimentScore, asset, chatId) {
 
     const chainId = await publicClient.getChainId();
 
-    // Example Values for WETH/USDC Uniswap Pool on Ethereum Mainnet:
+    // Example Values for WETH/USDC Uniswap Pool on Ethereum Sepolia:
     const WETH_ADDRESS = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14";
     const USDC_ADDRESS = "0xBe72e441BF55620FEBcC26715DB68d3494213D8C";
     const USDC_ETH_POOL_ADDRESS = "0x9799b5edc1aa7d3fad350309b08df3f64914e244";
@@ -596,371 +596,371 @@ bot.onText(/\/start/, async (msg) => {
         keyboard: keyboard,
         resize_keyboard: true,
         one_time_keyboard: false
-    }
-  });
-} catch (error) {
-  console.error('Error in /start command:', error);
-  bot.sendMessage(chatId, 'An error occurred while initializing the bot. Please try again later.');
-}
+      }
+    });
+  } catch (error) {
+    console.error('Error in /start command:', error);
+    bot.sendMessage(chatId, 'An error occurred while initializing the bot. Please try again later.');
+  }
 });
 
 // Predict Command
 bot.onText(/\/predict (.+)/, async (msg, match) => {
-const chatId = msg.chat.id;
-const asset = match[1].toUpperCase();
-try {
-  if (!assets.includes(asset)) {
-    bot.sendMessage(chatId, `Sorry, ${asset} is not supported. Please choose from: ${assets.join(', ')}.`);
-    return;
-  }
-  const sentimentScore = await fetchAndAnalyzeTweets(`#${asset}`);
-  const price = await fetchPriceData(asset);
-
-  if (sentimentScore !== null && price !== null) {
-    const sentimentPercentage = convertSentimentScoreToPercentage(sentimentScore);
-    const pnlCard = mapToPNLCardScale(sentimentPercentage);
-    
-    let action = 'hold';
-    const user = userData.get(chatId);
-    if (user?.thresholds) {
-      const buyThresholdPercentage = convertSentimentScoreToPercentage(user.thresholds.buy);
-      const sellThresholdPercentage = convertSentimentScoreToPercentage(user.thresholds.sell);
-      if (sentimentPercentage >= buyThresholdPercentage) action = 'buy';
-      else if (sentimentPercentage <= sellThresholdPercentage) action = 'sell';
-    } else {
-      action = sentimentScore > 0 ? 'buy' : (sentimentScore < 0 ? 'sell' : 'hold');
+  const chatId = msg.chat.id;
+  const asset = match[1].toUpperCase();
+  try {
+    if (!assets.includes(asset)) {
+      bot.sendMessage(chatId, `Sorry, ${asset} is not supported. Please choose from: ${assets.join(', ')}.`);
+      return;
     }
-    
-    bot.sendMessage(chatId, `Current sentiment score for ${asset}: ${sentimentPercentage.toFixed(2)}% which corresponds to **PNL Card #${pnlCard}**. Current price: $${price}. I would ${action}.`);
-    
-    // Path to the PNL card image
-    const imagePath = path.join(__dirname, 'pnl_cards', `${pnlCard}.png`);
-    
-    // Check if the file exists
-    fs.access(imagePath, fs.constants.F_OK, (err) => {
-      if (err) {
-        console.error(`PNL Card image for #${pnlCard} not found:`, err);
-        bot.sendMessage(chatId, `Sorry, the PNL Card image for #${pnlCard} is not available.`);
+    const sentimentScore = await fetchAndAnalyzeTweets(`#${asset}`);
+    const price = await fetchPriceData(asset);
+
+    if (sentimentScore !== null && price !== null) {
+      const sentimentPercentage = convertSentimentScoreToPercentage(sentimentScore);
+      const pnlCard = mapToPNLCardScale(sentimentPercentage);
+      
+      let action = 'hold';
+      const user = userData.get(chatId);
+      if (user?.thresholds) {
+        const buyThresholdPercentage = convertSentimentScoreToPercentage(user.thresholds.buy);
+        const sellThresholdPercentage = convertSentimentScoreToPercentage(user.thresholds.sell);
+        if (sentimentPercentage >= buyThresholdPercentage) action = 'buy';
+        else if (sentimentPercentage <= sellThresholdPercentage) action = 'sell';
       } else {
-        // Send the PNL card image
-        bot.sendPhoto(chatId, imagePath, {}, {
-          caption: `Here is your PNL Card for ${asset}`
-        });
+        action = sentimentScore > 0 ? 'buy' : (sentimentScore < 0 ? 'sell' : 'hold');
       }
-    });
-  } else {
-    bot.sendMessage(chatId, 'Error fetching market sentiment or price data.');
+      
+      bot.sendMessage(chatId, `Current sentiment score for ${asset}: ${sentimentPercentage.toFixed(2)}% which corresponds to **PNL Card #${pnlCard}**. Current price: $${price}. I would ${action}.`);
+      
+      // Path to the PNL card image
+      const imagePath = path.join(__dirname, 'pnl_cards', `${pnlCard}.png`);
+      
+      // Check if the file exists
+      fs.access(imagePath, fs.constants.F_OK, (err) => {
+        if (err) {
+          console.error(`PNL Card image for #${pnlCard} not found:`, err);
+          bot.sendMessage(chatId, `Sorry, the PNL Card image for #${pnlCard} is not available.`);
+        } else {
+          // Send the PNL card image
+          bot.sendPhoto(chatId, imagePath, {}, {
+            caption: `Here is your PNL Card for ${asset}`
+          });
+        }
+      });
+    } else {
+      bot.sendMessage(chatId, 'Error fetching market sentiment or price data.');
+    }
+  } catch (error) {
+    console.error('Error in predict command:', error);
+    bot.sendMessage(chatId, 'An error occurred while processing your request.');
   }
-} catch (error) {
-  console.error('Error in predict command:', error);
-  bot.sendMessage(chatId, 'An error occurred while processing your request.');
-}
 });
 
 // Insights Command
 bot.onText(/\/insights (.+)/, async (msg, match) => {
-const chatId = msg.chat.id;
-const asset = match[1].toUpperCase();
-try {
-  if (!assets.includes(asset)) {
-    bot.sendMessage(chatId, `Sorry, ${asset} is not supported. Please choose from: ${assets.join(', ')}.`);
-    return;
-  }
-  const sentimentScore = await fetchAndAnalyzeTweets(`#${asset}`);
-  const currentPrice = await fetchPriceData(asset);
-  const user = userData.get(chatId);
-  const buyPrice = user?.portfolio?.[asset]?.buyPrice || currentPrice;
+  const chatId = msg.chat.id;
+  const asset = match[1].toUpperCase();
+  try {
+    if (!assets.includes(asset)) {
+      bot.sendMessage(chatId, `Sorry, ${asset} is not supported. Please choose from: ${assets.join(', ')}.`);
+      return;
+    }
+    const sentimentScore = await fetchAndAnalyzeTweets(`#${asset}`);
+    const currentPrice = await fetchPriceData(asset);
+    const user = userData.get(chatId);
+    const buyPrice = user?.portfolio?.[asset]?.buyPrice || currentPrice;
 
-  if (sentimentScore !== null && currentPrice !== null) {
-    const fileId = await storeSentimentData(asset, sentimentScore);
-    bot.sendMessage(chatId, `Current Market Sentiment for ${asset}:\nIPFS Link: https://${process.env.PINATA_GATEWAY}/ipfs/${fileId}`);
-    
-    // Execute trade based on sentiment and price
-    await executeTrade(sentimentScore, asset, currentPrice, buyPrice, chatId);
-  } else {
-    bot.sendMessage(chatId, 'An error occurred while fetching market sentiment or price data.');
+    if (sentimentScore !== null && currentPrice !== null) {
+      const fileId = await storeSentimentData(asset, sentimentScore);
+      bot.sendMessage(chatId, `Current Market Sentiment for ${asset}:\nIPFS Link: https://${process.env.PINATA_GATEWAY}/ipfs/${fileId}`);
+      
+      // Execute trade based on sentiment and price
+      await executeTrade(sentimentScore, asset, currentPrice, buyPrice, chatId);
+    } else {
+      bot.sendMessage(chatId, 'An error occurred while fetching market sentiment or price data.');
+    }
+  } catch (error) {
+    console.error('Error in insights command:', error);
+    bot.sendMessage(chatId, 'An error occurred while processing your request.');
   }
-} catch (error) {
-  console.error('Error in insights command:', error);
-  bot.sendMessage(chatId, 'An error occurred while processing your request.');
-}
 });
 
 // Bot Stats Command
 bot.onText(/\/bot_stats/, (msg) => {
-const chatId = msg.chat.id;
-try {
-  const stats = getBotStats();
-  const totalPNL = calculateTotalPNL(chatId);
-  const message = `Bot Uptime: ${stats.uptime} hours\nTrades Executed: ${stats.tradesExecuted}\nSentiment Analysis Accuracy: ${stats.sentimentAccuracy}%\nTotal PNL: ${totalPNL}\nLast Update: ${stats.lastUpdate}`;
-  bot.sendMessage(chatId, message);
-} catch (error) {
-  console.error('Error in bot_stats command:', error);
-  bot.sendMessage(chatId, 'An error occurred while retrieving bot statistics.');
-}
+  const chatId = msg.chat.id;
+  try {
+    const stats = getBotStats();
+    const totalPNL = calculateTotalPNL(chatId);
+    const message = `Bot Uptime: ${stats.uptime} hours\nTrades Executed: ${stats.tradesExecuted}\nSentiment Analysis Accuracy: ${stats.sentimentAccuracy}%\nTotal PNL: ${totalPNL}\nLast Update: ${stats.lastUpdate}`;
+    bot.sendMessage(chatId, message);
+  } catch (error) {
+    console.error('Error in bot_stats command:', error);
+    bot.sendMessage(chatId, 'An error occurred while retrieving bot statistics.');
+  }
 });
 
 // Manage Portfolio Command
 bot.onText(/\/manage_portfolio/, async (msg) => {
-const chatId = msg.chat.id;
-try {
-  const user = userData.get(chatId);
-  if (!user || !user.portfolio) {
-    bot.sendMessage(chatId, 'You have no portfolio to manage yet. Use /insights to start trading.');
-    return;
+  const chatId = msg.chat.id;
+  try {
+    const user = userData.get(chatId);
+    if (!user || !user.portfolio) {
+      bot.sendMessage(chatId, 'You have no portfolio to manage yet. Use /insights to start trading.');
+      return;
+    }
+    
+    const sentimentData = {};
+    for (let asset of Object.keys(user.portfolio)) {
+      sentimentData[asset] = await fetchAndAnalyzeTweets(`#${asset}`);
+    }
+    const updatedPortfolio = await managePortfolio(chatId, sentimentData);
+    bot.sendMessage(chatId, `Your updated portfolio based on current sentiment:\n${JSON.stringify(updatedPortfolio, null, 2)}`);
+  } catch (error) {
+    console.error('Error in manage_portfolio command:', error);
+    bot.sendMessage(chatId, 'An error occurred while managing your portfolio.');
   }
-  
-  const sentimentData = {};
-  for (let asset of Object.keys(user.portfolio)) {
-    sentimentData[asset] = await fetchAndAnalyzeTweets(`#${asset}`);
-  }
-  const updatedPortfolio = await managePortfolio(chatId, sentimentData);
-  bot.sendMessage(chatId, `Your updated portfolio based on current sentiment:\n${JSON.stringify(updatedPortfolio, null, 2)}`);
-} catch (error) {
-  console.error('Error in manage_portfolio command:', error);
-  bot.sendMessage(chatId, 'An error occurred while managing your portfolio.');
-}
 });
 
 // Trade History Command
 bot.onText(/\/trade_history/, async (msg) => {
-const chatId = msg.chat.id;
-try {
-  const user = userData.get(chatId);
-  if (user && user.tradeHistory && user.tradeHistory.length > 0) {
-    let historyMessage = '```\n';
-    historyMessage += 'Currency\tPNL\tStatus\tID\tTimeframe\tTimestamp\tEntry Price\tExit Price\n';
-    user.tradeHistory.forEach(trade => {
-      historyMessage += `${trade.currency}\t${trade.pnl}\t${trade.status}\t${trade.id}\t${trade.timeframe}\t${trade.timestamp}\t$${trade.entryPrice}\t$${trade.exitPrice}\n`;
-    });
-    historyMessage += '```';
-    bot.sendMessage(chatId, `Your trade history:\n${historyMessage}`, { parse_mode: 'Markdown' });
-  } else {
-    bot.sendMessage(chatId, 'You have no trade history yet.');
+  const chatId = msg.chat.id;
+  try {
+    const user = userData.get(chatId);
+    if (user && user.tradeHistory && user.tradeHistory.length > 0) {
+      let historyMessage = '```\n';
+      historyMessage += 'Currency\tPNL\tStatus\tID\tTimeframe\tTimestamp\tEntry Price\tExit Price\n';
+      user.tradeHistory.forEach(trade => {
+        historyMessage += `${trade.currency}\t${trade.pnl}\t${trade.status}\t${trade.id}\t${trade.timeframe}\t${trade.timestamp}\t$${trade.entryPrice}\t$${trade.exitPrice}\n`;
+      });
+      historyMessage += '```';
+      bot.sendMessage(chatId, `Your trade history:\n${historyMessage}`, { parse_mode: 'Markdown' });
+    } else {
+      bot.sendMessage(chatId, 'You have no trade history yet.');
+    }
+  } catch (error) {
+    console.error('Error in trade_history command:', error);
+    bot.sendMessage(chatId, 'An error occurred while fetching your trade history.');
   }
-} catch (error) {
-  console.error('Error in trade_history command:', error);
-  bot.sendMessage(chatId, 'An error occurred while fetching your trade history.');
-}
 });
 
 // Settings Command - Inline Menu
 bot.onText(/\/settings/, (msg) => {
-const chatId = msg.chat.id;
-try {
-  const inlineKeyboard = [
-    [{ text: 'Set Thresholds', callback_data: 'set_thresholds' }],
-    [{ text: 'Set Profit Threshold', callback_data: 'set_profit_threshold' }],
-    [{ text: 'Set Stop-Loss', callback_data: 'set_stop_loss' }],
-    [{ text: 'Set Risk', callback_data: 'set_risk' }],
-    [{ text: 'Change Language', callback_data: 'change_language' }],
-    [{ text: 'News', callback_data: 'news' }]
-  ];
-  bot.sendMessage(chatId, 'Choose a setting to adjust:', {
-    reply_markup: {
-      inline_keyboard: inlineKeyboard
-    }
-  });
-} catch (error) {
-  console.error('Error in settings command:', error);
-  bot.sendMessage(chatId, 'An error occurred while displaying settings.');
-}
+  const chatId = msg.chat.id;
+  try {
+    const inlineKeyboard = [
+      [{ text: 'Set Thresholds', callback_data: 'set_thresholds' }],
+      [{ text: 'Set Profit Threshold', callback_data: 'set_profit_threshold' }],
+      [{ text: 'Set Stop-Loss', callback_data: 'set_stop_loss' }],
+      [{ text: 'Set Risk', callback_data: 'set_risk' }],
+      [{ text: 'Change Language', callback_data: 'change_language' }],
+      [{ text: 'News', callback_data: 'news' }]
+    ];
+    bot.sendMessage(chatId, 'Choose a setting to adjust:', {
+      reply_markup: {
+        inline_keyboard: inlineKeyboard
+      }
+    });
+  } catch (error) {
+    console.error('Error in settings command:', error);
+    bot.sendMessage(chatId, 'An error occurred while displaying settings.');
+  }
 });
 
 // Handling callback queries for settings
 bot.on('callback_query', async (query) => {
-const chatId = query.message.chat.id;
-try {
-  switch (query.data) {
-    case 'set_thresholds':
-      bot.sendMessage(chatId, 'Please provide buy and sell thresholds as /set_threshold buy_threshold sell_threshold. Example: /set_threshold 1.5 -1.5');
-      break;
-    case 'set_profit_threshold':
-      bot.sendMessage(chatId, 'Please provide your profit threshold as /set_profit_threshold percentage. Example: /set_profit_threshold 20');
-      break;
-    case 'set_stop_loss':
-      bot.sendMessage(chatId, 'Please provide your stop-loss threshold as /set_stop_loss percentage. Example: /set_stop_loss 10');
-      break;
-    case 'set_risk':
-      bot.sendMessage(chatId, 'Please provide your risk percentage as /set_risk percentage. Example: /set_risk 5');
-      break;
-    case 'change_language':
-      const languageKeyboard = Object.keys(languages).map(lang => [{ text: languages[lang], callback_data: `lang_${lang}` }]);
-      bot.sendMessage(chatId, 'Select your preferred language:', {
-        reply_markup: {
-          inline_keyboard: languageKeyboard
+  const chatId = query.message.chat.id;
+  try {
+    switch (query.data) {
+      case 'set_thresholds':
+        bot.sendMessage(chatId, 'Please provide buy and sell thresholds as /set_threshold buy_threshold sell_threshold. Example: /set_threshold 1.5 -1.5');
+        break;
+      case 'set_profit_threshold':
+        bot.sendMessage(chatId, 'Please provide your profit threshold as /set_profit_threshold percentage. Example: /set_profit_threshold 20');
+        break;
+      case 'set_stop_loss':
+        bot.sendMessage(chatId, 'Please provide your stop-loss threshold as /set_stop_loss percentage. Example: /set_stop_loss 10');
+        break;
+      case 'set_risk':
+        bot.sendMessage(chatId, 'Please provide your risk percentage as /set_risk percentage. Example: /set_risk 5');
+        break;
+      case 'change_language':
+        const languageKeyboard = Object.keys(languages).map(lang => [{ text: languages[lang], callback_data: `lang_${lang}` }]);
+        bot.sendMessage(chatId, 'Select your preferred language:', {
+          reply_markup: {
+            inline_keyboard: languageKeyboard
+          }
+        });
+        break;
+      case 'news':
+        bot.sendMessage(chatId, 'Please provide an asset to get news about as /news asset. Example: /news BTC');
+        break;
+      default:
+        if (query.data.startsWith('lang_')) {
+          const lang = query.data.split('_')[1];
+          if (!userData.has(chatId)) userData.set(chatId, {});
+          userData.get(chatId).language = lang;
+          bot.answerCallbackQuery(query.id);
+          bot.sendMessage(chatId, `Language set to ${languages[lang]}`);
         }
-      });
-      break;
-    case 'news':
-      bot.sendMessage(chatId, 'Please provide an asset to get news about as /news asset. Example: /news BTC');
-      break;
-    default:
-      if (query.data.startsWith('lang_')) {
-        const lang = query.data.split('_')[1];
-        if (!userData.has(chatId)) userData.set(chatId, {});
-        userData.get(chatId).language = lang;
-        bot.answerCallbackQuery(query.id);
-        bot.sendMessage(chatId, `Language set to ${languages[lang]}`);
-      }
+    }
+  } catch (error) {
+    console.error('Error handling callback query:', error);
+    bot.answerCallbackQuery(query.id, { text: 'An error occurred.', show_alert: true });
   }
-} catch (error) {
-  console.error('Error handling callback query:', error);
-  bot.answerCallbackQuery(query.id, { text: 'An error occurred.', show_alert: true });
-}
 });
 
 // Set Thresholds Command
 bot.onText(/\/set_threshold (.+) (.+)/, (msg, match) => {
-const chatId = msg.chat.id;
-const buyThreshold = parseFloat(match[1]);
-const sellThreshold = parseFloat(match[2]);
+  const chatId = msg.chat.id;
+  const buyThreshold = parseFloat(match[1]);
+  const sellThreshold = parseFloat(match[2]);
 
-try {
-  if (!isNaN(buyThreshold) && !isNaN(sellThreshold)) {
-    if (!userData.has(chatId)) userData.set(chatId, {});
-    userData.get(chatId).thresholds = { buy: buyThreshold, sell: sellThreshold };
-    bot.sendMessage(chatId, `Your sentiment thresholds have been set to Buy: ${buyThreshold}, Sell: ${sellThreshold}.`);
-  } else {
-    bot.sendMessage(chatId, 'Please provide valid numbers for buy and sell thresholds.');
+  try {
+    if (!isNaN(buyThreshold) && !isNaN(sellThreshold)) {
+      if (!userData.has(chatId)) userData.set(chatId, {});
+      userData.get(chatId).thresholds = { buy: buyThreshold, sell: sellThreshold };
+      bot.sendMessage(chatId, `Your sentiment thresholds have been set to Buy: ${buyThreshold}, Sell: ${sellThreshold}.`);
+    } else {
+      bot.sendMessage(chatId, 'Please provide valid numbers for buy and sell thresholds.');
+    }
+  } catch (error) {
+    console.error('Error in set_threshold command:', error);
+    bot.sendMessage(chatId, 'An error occurred while setting thresholds.');
   }
-} catch (error) {
-  console.error('Error in set_threshold command:', error);
-  bot.sendMessage(chatId, 'An error occurred while setting thresholds.');
-}
 });
 
 // Set Profit Threshold Command
 bot.onText(/\/set_profit_threshold (.+)/, (msg, match) => {
-const chatId = msg.chat.id;
-const profitThreshold = parseFloat(match[1]);
+  const chatId = msg.chat.id;
+  const profitThreshold = parseFloat(match[1]);
 
-try {
-  if (!isNaN(profitThreshold)) {
-    if (!userData.has(chatId)) userData.set(chatId, {});
-    userData.get(chatId).profitThreshold = profitThreshold;
-    bot.sendMessage(chatId, `Your profit threshold has been set to ${profitThreshold}%.`);
-  } else {
-    bot.sendMessage(chatId, 'Please provide a valid number for the profit threshold.');
+  try {
+    if (!isNaN(profitThreshold)) {
+      if (!userData.has(chatId)) userData.set(chatId, {});
+      userData.get(chatId).profitThreshold = profitThreshold;
+      bot.sendMessage(chatId, `Your profit threshold has been set to ${profitThreshold}%.`);
+    } else {
+      bot.sendMessage(chatId, 'Please provide a valid number for the profit threshold.');
+    }
+  } catch (error) {
+    console.error('Error in set_profit_threshold command:', error);
+    bot.sendMessage(chatId, 'An error occurred while setting profit threshold.');
   }
-} catch (error) {
-  console.error('Error in set_profit_threshold command:', error);
-  bot.sendMessage(chatId, 'An error occurred while setting profit threshold.');
-}
 });
 
 // Set Stop-Loss Command
 bot.onText(/\/set_stop_loss (.+)/, (msg, match) => {
-const chatId = msg.chat.id;
-const stopLossPercentage = parseFloat(match[1]);
+  const chatId = msg.chat.id;
+  const stopLossPercentage = parseFloat(match[1]);
 
-try {
-  if (!isNaN(stopLossPercentage)) {
-    if (!userData.has(chatId)) userData.set(chatId, {});
-    userData.get(chatId).stopLossThreshold = stopLossPercentage;
-    bot.sendMessage(chatId, `Your stop-loss threshold has been set to ${stopLossPercentage}%.`);
-  } else {
-    bot.sendMessage(chatId, 'Please provide a valid number for the stop-loss threshold.');
-}
-} catch (error) {
-console.error('Error in set_stop_loss command:', error);
-bot.sendMessage(chatId, 'An error occurred while setting stop-loss threshold.');
-}
+  try {
+    if (!isNaN(stopLossPercentage)) {
+      if (!userData.has(chatId)) userData.set(chatId, {});
+      userData.get(chatId).stopLossThreshold = stopLossPercentage;
+      bot.sendMessage(chatId, `Your stop-loss threshold has been set to ${stopLossPercentage}%.`);
+    } else {
+      bot.sendMessage(chatId, 'Please provide a valid number for the stop-loss threshold.');
+    }
+  } catch (error) {
+    console.error('Error in set_stop_loss command:', error);
+    bot.sendMessage(chatId, 'An error occurred while setting stop-loss threshold.');
+  }
 });
 
 // Set Risk Command
 bot.onText(/\/set_risk (.+)/, (msg, match) => {
-const chatId = msg.chat.id;
-const riskPercentage = parseFloat(match[1]);
+  const chatId = msg.chat.id;
+  const riskPercentage = parseFloat(match[1]);
 
-try {
-if (!isNaN(riskPercentage)) {
-  if (!userData.has(chatId)) userData.set(chatId, {});
-  userData.get(chatId).riskPercentage = riskPercentage;
-  bot.sendMessage(chatId, `Risk percentage set to ${riskPercentage}%.`);
-} else {
-  bot.sendMessage(chatId, 'Please provide a valid number for risk percentage.');
-}
-} catch (error) {
-console.error('Error in set_risk command:', error);
-bot.sendMessage(chatId, 'An error occurred while setting risk.');
-}
+  try {
+    if (!isNaN(riskPercentage)) {
+      if (!userData.has(chatId)) userData.set(chatId, {});
+      userData.get(chatId).riskPercentage = riskPercentage;
+      bot.sendMessage(chatId, `Risk percentage set to ${riskPercentage}%.`);
+    } else {
+      bot.sendMessage(chatId, 'Please provide a valid number for risk percentage.');
+    }
+  } catch (error) {
+    console.error('Error in set_risk command:', error);
+    bot.sendMessage(chatId, 'An error occurred while setting risk.');
+  }
 });
 
 // Fetch News Command
 async function fetchNews(asset) {
-try {
-const news = await newsapi.v2.everything({
-  q: asset,
-  language: 'en',
-  sortBy: 'publishedAt',
-  pageSize: 5
-});
-return news.articles;
-} catch (error) {
-console.error('Error fetching news:', error);
-throw error;
-}
+  try {
+    const news = await newsapi.v2.everything({
+      q: asset,
+      language: 'en',
+      sortBy: 'publishedAt',
+      pageSize: 5
+    });
+    return news.articles;
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    throw error;
+  }
 }
 
 bot.onText(/\/news (.+)/, async (msg, match) => {
-const chatId = msg.chat.id;
-const asset = match[1].toUpperCase();
-try {
-if (!assets.includes(asset)) {
-  bot.sendMessage(chatId, `Sorry, ${asset} is not supported. Please choose from: ${assets.join(', ')}.`);
-  return;
-}
-const articles = await fetchNews(asset);
-if (articles && articles.length > 0) {
-  let newsMessage = `Here are the latest news articles related to ${asset}:\n\n`;
-  articles.forEach((article, index) => {
-    newsMessage += `${index + 1}. [${article.title}](${article.url})\nPublished by ${article.source.name} on ${new Date(article.publishedAt).toLocaleDateString()}\n\n`;
-  });
-  bot.sendMessage(chatId, newsMessage, { parse_mode: 'Markdown' });
-} else {
-  bot.sendMessage(chatId, `No recent news found for ${asset}.`);
-}
-} catch (error) {
-console.error('Error fetching news:', error);
-bot.sendMessage(chatId, 'An error occurred while fetching news.');
-}
+  const chatId = msg.chat.id;
+  const asset = match[1].toUpperCase();
+  try {
+    if (!assets.includes(asset)) {
+      bot.sendMessage(chatId, `Sorry, ${asset} is not supported. Please choose from: ${assets.join(', ')}.`);
+      return;
+    }
+    const articles = await fetchNews(asset);
+    if (articles && articles.length > 0) {
+      let newsMessage = `Here are the latest news articles related to ${asset}:\n\n`;
+      articles.forEach((article, index) => {
+        newsMessage += `${index + 1}. [${article.title}](${article.url})\nPublished by ${article.source.name} on ${new Date(article.publishedAt).toLocaleDateString()}\n\n`;
+      });
+      bot.sendMessage(chatId, newsMessage, { parse_mode: 'Markdown' });
+    } else {
+      bot.sendMessage(chatId, `No recent news found for ${asset}.`);
+    }
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    bot.sendMessage(chatId, 'An error occurred while fetching news.');
+  }
 });
 
 // Error Handling for Bot Operations
 bot.on('polling_error', (error) => {
-console.error('Polling error:', error);
+  console.error('Polling error:', error);
 });
 
 process.on('uncaughtException', (err) => {
-console.error('Uncaught Exception:', err);
-// Here you might want to notify admins or log errors to a service
+  console.error('Uncaught Exception:', err);
+  // Here you might want to notify admins or log errors to a service
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-// Similar to uncaught exceptions, you might want to handle this
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Similar to uncaught exceptions, you might want to handle this
 });
 
 // Webhook or API endpoint for monitoring or external interactions
 app.post('/updateBotStats', (req, res) => {
-try {
-// Example endpoint to update bot stats from external sources
-if (req.body.tradesExecuted) {
-  botStats.tradesExecuted = req.body.tradesExecuted;
-  botStats.lastUpdate = new Date();
-  res.status(200).send('Bot stats updated successfully');
-} else {
-  res.status(400).send('Invalid request: No tradesExecuted provided');
-}
-} catch (error) {
-console.error('Error updating bot stats:', error);
-res.status(500).send('An error occurred while updating bot stats');
-}
+  try {
+    // Example endpoint to update bot stats from external sources
+    if (req.body.tradesExecuted) {
+      botStats.tradesExecuted = req.body.tradesExecuted;
+      botStats.lastUpdate = new Date();
+      res.status(200).send('Bot stats updated successfully');
+    } else {
+      res.status(400).send('Invalid request: No tradesExecuted provided');
+    }
+  } catch (error) {
+    console.error('Error updating bot stats:', error);
+    res.status(500).send('An error occurred while updating bot stats');
+  }
 });
 
 // Start the Express server for potential webhooks or API endpoints
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
