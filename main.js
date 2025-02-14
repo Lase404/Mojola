@@ -315,6 +315,7 @@ bot.hears('Translate Video 📹', (ctx) => {
 });
 
 // Set webhook
+const WEBHOOK_URL = process.env.WEBHOOK_URL
 bot.telegram.setWebhook(`${WEBHOOK_URL}/webhook/telegram`);
 
 // Handle incoming updates from Telegram
