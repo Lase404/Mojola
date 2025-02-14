@@ -327,7 +327,7 @@ const PORT = 4000
 
 // =================== Start Express Server ===================
 const bodyParser = require('body-parser');
-const WEBHOOK_PATH = '/webhook/telegram';
+const WEBHOOK_PATH = '/webhook';
 app.use(WEBHOOK_PATH, bodyParser.json());
 
 async function setBotInfoWithRetry(attempt = 1) {
